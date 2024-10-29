@@ -4,6 +4,7 @@ import pickle
 import hashlib
 import numpy as np
 import os
+import time
 
 
 class FaceRecognitionApp:
@@ -37,7 +38,7 @@ class FaceRecognitionApp:
 
     def register_face(self, image_path):
         """Register a face and return a unique ID."""
-        if (uid:=self.recognize_face(image_path)) is not None:
+        if (uid := self.recognize_face(image_path)) is not None:
             return uid
         # Load the image
         image = cv2.imread(image_path)
@@ -81,23 +82,50 @@ class FaceRecognitionApp:
         return None
 
 
+
+def take_photo(output_path='photo.jpg'):
+    # Initialize the webcam
+    cap = cv2.VideoCapture(0)  # 0 is usually the default webcam
+
+    if not cap.isOpened():
+        print("Error: Could not open webcam")
+        return False
+
+    # Add a small delay to let the camera warm up
+    time.sleep(1)
+
+    # Capture the photo
+    ret, frame = cap.read()
+    success = False
+
+    if ret:
+        # Save the image
+        cv2.imwrite(output_path, frame)
+        print(f"Photo saved as {output_path}")
+        success = True
+    else:
+        print("Error: Could not capture photo")
+
+    # Clean up
+    cap.release()
+
+    return success
+
 if __name__ == "__main__":
     app = FaceRecognitionApp()
 
     try:
-        unique_id = app.register_face('c.jpg')  # Change to your image path
+        unique_id = app.register_face("pics/s1.jpg")  # Change to your image path
         print(f"Registered face with ID: {unique_id}")
     except ValueError as e:
         print(e)
 
-    recognized_id = app.recognize_face("c.jpg")  # Change to your image path
+    recognized_id = app.recognize_face("pics/s1.jpg")  # Change to your image path
     if recognized_id is not None:
         print(f"Recognized face with ID: {recognized_id}")
     else:
         print("Face not recognized.")
 
+    take_photo()
 
-# e85c8420e15a03ff4cadc929ca344feb7b4b90ab98a2af1588bab1c39d9b5e5c
-# e85c8420e15a03ff4cadc929ca344feb7b4b90ab98a2af1588bab1c39d9b5e5c
-# e85c8420e15a03ff4cadc929ca344feb7b4b90ab98a2af1588bab1c39d9b5e5c
-# e85c8420e15a03ff4cadc929ca344feb7b4b90ab98a2af1588bab1c39d9b5e5c
+# a3ec35a1f5a2befbcaf7d16db400b14c2cc4daea42cf90c75ef603d94067c2cf

@@ -1,1 +1,5 @@
 /face/*.dat
+identifier.sqlite
+*.db
+/face/*.pkl
+/face/pics/*.jpg
