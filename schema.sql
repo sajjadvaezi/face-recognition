@@ -4,10 +4,10 @@ CREATE TABLE IF NOT EXISTS users (
                                      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS face_data (
-                                         face_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                         user_id INTEGER NOT NULL,
-                                         face_hash TEXT NOT NULL UNIQUE,
-                                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                                         FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-    );
+CREATE TABLE IF NOT EXISTS user_faces (
+                                          face_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                          user_id INTEGER NOT NULL,
+                                          face_hash TEXT NOT NULL UNIQUE,
+                                          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                          FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);

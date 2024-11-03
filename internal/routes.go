@@ -12,5 +12,7 @@ func SetupRouter() *http.ServeMux {
 	mux.HandleFunc("/register", RegisterHandler)   // Handles POST requests to register faces
 	mux.HandleFunc("/recognize", RecognizeHandler) // Handles POST requests to recognize faces
 
+	mux.HandleFunc("/add/face", AddFaceHandler)
+
 	return mux
 }
