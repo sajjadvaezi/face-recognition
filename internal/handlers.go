@@ -30,7 +30,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
 		fmt.Println(err.Error())
-		
+
 		return
 	}
 

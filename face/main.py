@@ -1,3 +1,5 @@
+from calendar import error
+
 import cv2
 import dlib
 import pickle
@@ -5,6 +7,9 @@ import hashlib
 import numpy as np
 import os
 import time
+from flask import Flask, jsonify
+from datetime import datetime
+
 
 
 class FaceRecognitionApp:
@@ -111,21 +116,63 @@ def take_photo(output_path='photo.jpg'):
 
     return success
 
-if __name__ == "__main__":
-    app = FaceRecognitionApp()
 
+
+frApp = FaceRecognitionApp()
+app = Flask(__name__)
+
+@app.route('/health_check')
+def hello():
+    return jsonify(
+        status="everything is fine"
+    )
+
+@app.route('/recognize', methods=["GET"])
+def recognize():
+    now = datetime.now()
+    current_time = now.strftime("%H%M%S")
     try:
-        unique_id = app.register_face("pics/s1.jpg")  # Change to your image path
-        print(f"Registered face with ID: {unique_id}")
-    except ValueError as e:
-        print(e)
+        outputName = f"pics/{current_time}.jpg"
+        take_photo(output_path=outputName)
 
-    recognized_id = app.recognize_face("pics/s1.jpg")  # Change to your image path
-    if recognized_id is not None:
-        print(f"Recognized face with ID: {recognized_id}")
-    else:
-        print("Face not recognized.")
+        res = frApp.recognize_face(outputName)
+        if res == None:
+            return jsonify(
+                hash="",
+                error="couldn't recognize face"
+            )
 
-    take_photo()
+        return jsonify(
+            hash=res,
+            error=""
+        )
+    except Exception as e:
+        return jsonify(
+            hash="",
+            error=str(e)
+        )
+@app.route("/register", methods=["POST"])
+def register_face():
+    # use the current Hour Min Sec to save picture name in the pics dir
+    now = datetime.now()
+    current_time = now.strftime("%H%M%S")
+    try:
+        outputName = f"pics/{current_time}.jpg"
+        take_photo(output_path=outputName)
+        hash=frApp.register_face(outputName)
+        return jsonify(
+            hash=hash,
+            error=""
+        )
+    except Exception as e:
+        return jsonify(
+            hash="",
+            error=str(e)
+        )
 
-# a3ec35a1f5a2befbcaf7d16db400b14c2cc4daea42cf90c75ef603d94067c2cf
+
+
+
+if __name__ == "__main__":
+    app.run()
+
