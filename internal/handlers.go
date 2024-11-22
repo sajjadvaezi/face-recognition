@@ -7,9 +7,14 @@ import (
 	"net/http"
 )
 
+func CheckHealthHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "fine")
+}
+
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	type registerRequest struct {
-		Name string `json:"name"`
+		Name          string `json:"name"`
+		StudentNumber string `json:"student_number"`
 	}
 
 	type registerResponse struct {
@@ -22,7 +27,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err.Error())
 		return
 	}
-	createdUserID, err := services.CreateUser(request.Name)
+	createdUserID, err := services.CreateUser(request.Name, request.StudentNumber)
 	if err != nil {
 		return
 	}
@@ -37,21 +42,12 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func RecognizeHandler(w http.ResponseWriter, r *http.Request) {
-	type recognizeRequest struct {
-		Hash string `json:"hash"`
-	}
 
 	type recognizeResponse struct {
 		Name string `json:"name"`
 	}
-	recReq := recognizeRequest{}
-	err := json.NewDecoder(r.Body).Decode(&recReq)
-	if err != nil {
-		fmt.Println(err.Error())
 
-		return
-	}
-	name, err := services.RecognizeFace(recReq.Hash)
+	name, err := services.RecognizeFace()
 	if err != nil {
 		fmt.Println(err.Error())
 
@@ -71,23 +67,45 @@ func RecognizeHandler(w http.ResponseWriter, r *http.Request) {
 
 func AddFaceHandler(w http.ResponseWriter, r *http.Request) {
 	type addFaceRequest struct {
-		UserId int    `json:"id"`
-		Hash   string `json:"hash"`
+		StudentNumber string `json:"student_number"`
 	}
-	afReq := addFaceRequest{}
+
+	type response struct {
+		Result string `json:"result"`
+		Error  string `json:"error,omitempty"`
+	}
+
+	// Decode the request body
+	var afReq addFaceRequest
 	err := json.NewDecoder(r.Body).Decode(&afReq)
 	if err != nil {
-		fmt.Println("Decoding error ", err.Error())
-
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		fmt.Println("Decoding error:", err.Error())
 		return
 	}
 
-	err = services.AddFace(int64(afReq.UserId), afReq.Hash)
+	// Validate input
+	if afReq.StudentNumber == "" {
+		http.Error(w, "StudentNumber is required", http.StatusBadRequest)
+		fmt.Println("Validation error: StudentNumber is empty")
+		return
+	}
+
+	// Call the service to add the face
+	err = services.AddFace(afReq.StudentNumber)
 	if err != nil {
-		fmt.Println("Encoding error ", err.Error())
-
+		http.Error(w, "Failed to add face to database", http.StatusInternalServerError)
+		fmt.Println("Service error:", err.Error())
 		return
 	}
-	fmt.Fprintf(w, "success")
 
+	// Respond with success
+	res := response{
+		Result: "successful",
+	}
+	w.WriteHeader(http.StatusOK)
+	err = json.NewEncoder(w).Encode(res)
+	if err != nil {
+		fmt.Println("Encoding response error:", err.Error())
+	}
 }

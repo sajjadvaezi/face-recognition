@@ -4,8 +4,8 @@ import (
 	"github.com/sajjadvaezi/face-recognition/db"
 )
 
-func CreateUser(name string) (int64, error) {
-	userID, err := db.AddUser(name)
+func CreateUser(name, studentNumber string) (int64, error) {
+	userID, err := db.AddUser(name, studentNumber)
 	if err != nil {
 
 		return -1, err
@@ -13,4 +13,3 @@ func CreateUser(name string) (int64, error) {
 
 	return userID, nil
 }
-

@@ -1,53 +1,30 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/sajjadvaezi/face-recognition/db"
 	"github.com/sajjadvaezi/face-recognition/internal"
-	"os/exec"
-
+	"log/slog"
 	"net/http"
+	"os"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func callPythonFunction(command, faceData string) (string, error) {
-	// Command to run Python script
-	cmd := exec.Command("python3", "./face/main.py", command, faceData)
-	output, err := cmd.Output()
-	if err != nil {
-		return "", err
-	}
-
-	// Parse JSON output
-	var result map[string]string
-	json.Unmarshal(output, &result)
-	return result["result"], nil
-}
-
 func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	db.InitSQLite()
 
 	mux := internal.SetupRouter()
 
-	//takePhotoRes, err := callPythonFunction("photo", "")
-	//if err != nil {
-	//	fmt.Println("Error registering face:", err)
-	//	return
-	//}
+	port := "8090"
+	addr := fmt.Sprintf("localhost:%s", port)
 
-	registerMsg, err := callPythonFunction("register", "photo.jpg")
+	logger.Info(fmt.Sprintf("staring server on %s", addr))
+	err := http.ListenAndServe(addr, mux)
+
 	if err != nil {
-		fmt.Println("Error registering face:", err)
-		return
-	}
-
-	//fmt.Println("takePhotoRes:", takePhotoRes)
-	fmt.Println("registerMsg: ", registerMsg)
-
-	err = http.ListenAndServe("localhost:8090", mux)
-	if err != nil {
+		logger.Error("could not start mux, error:", err)
 		return
 	}
 

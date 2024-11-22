@@ -3,14 +3,22 @@ package services
 import (
 	"fmt"
 	"github.com/sajjadvaezi/face-recognition/db"
+	"github.com/sajjadvaezi/face-recognition/internal/clients"
+	"log/slog"
 )
 
-func RecognizeFace(faceHash string) (name string, err error) {
-	if faceHash == "" {
+func RecognizeFace() (name string, err error) {
 
-		return "", fmt.Errorf("empty face hash")
+	fc := clients.NewFlaskClient("http://127.0.0.1:5000")
+	slog.Info("calling flask endpoint")
+	hash, err := fc.RecognizeFace()
+	if err != nil {
+		fmt.Println(err.Error())
+
+		return
 	}
-	user, err := db.FindUserByFaceHash(faceHash)
+
+	user, err := db.FindUserByFaceHash(hash)
 	if err != nil {
 
 		return "", err
@@ -19,14 +27,16 @@ func RecognizeFace(faceHash string) (name string, err error) {
 	return user.Name, nil
 }
 
-func AddFace(userId int64, hash string) error {
-	if hash == "" {
+func AddFace(studentNumber string) error {
 
-		return fmt.Errorf("empty face hash")
-	}
-	_, err := db.AddFace(int(userId), hash)
+	fc := clients.NewFlaskClient("http://127.0.0.1:5000")
+	slog.Info("calling flask endpoint")
+	hash, err := fc.RegisterFace()
+	fmt.Println("face hash")
+	_, err = db.AddFaceWithStudentNumber(studentNumber, hash)
 	if err != nil {
-		fmt.Println("add to db error error ")
+
+		fmt.Println("add to db error")
 
 		return err
 	}

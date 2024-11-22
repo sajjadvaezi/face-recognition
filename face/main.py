@@ -151,7 +151,7 @@ def recognize():
             hash="",
             error=str(e)
         )
-@app.route("/register", methods=["POST"])
+@app.route("/register")
 def register_face():
     # use the current Hour Min Sec to save picture name in the pics dir
     now = datetime.now()

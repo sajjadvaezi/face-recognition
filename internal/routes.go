@@ -7,6 +7,7 @@ import (
 // SetupRouter initializes the router and defines the routes
 func SetupRouter() *http.ServeMux {
 	mux := http.NewServeMux()
+	mux.HandleFunc("/checkhealth", CheckHealthHandler)
 
 	// Define routes for face registration and recognition
 	mux.HandleFunc("/register", RegisterHandler)   // Handles POST requests to register faces

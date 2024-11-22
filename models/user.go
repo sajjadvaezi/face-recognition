@@ -10,9 +10,10 @@ type FaceRecognition interface {
 
 // User represents a models with a unique ID, name, and associated face data.
 type User struct {
-	UserID    int
-	Name      string
-	CreatedAt string
+	UserID        int
+	Name          string
+	StudentNumber string
+	CreatedAt     string
 }
 
 type Face interface {
