@@ -9,11 +9,17 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"io"
 )
 
 type FlaskClient struct {
 	BaseURL    string
 	HTTPClient *http.Client
+}
+
+type FlaskResponse struct {
+	Hash  string `json:"hash"`
+	Error string `json:"error"`
 }
 
 func NewFlaskClient(baseURL string) *FlaskClient {
@@ -130,4 +136,33 @@ func (fc *FlaskClient) RegisterFace() (string, error) {
 	}
 
 	return result.Hash, nil
+}
+
+func (fc *FlaskClient) UploadImage(base64Image string) (*FlaskResponse ,error){
+	type ImageUploadRequest struct {
+		Image string `json:"image"`
+	}
+
+	payload := ImageUploadRequest{Image: base64Image}
+	jsonPayload, _ := json.Marshal(payload)
+
+	resp, err := http.Post("http://localhost:5000/recognize_upload", "application/json", bytes.NewBuffer(jsonPayload))
+	if err != nil {
+		return nil, fmt.Errorf("error sending request to Flask: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// Read Flask response
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading Flask response: %v", err)
+	}
+
+	var flaskResp FlaskResponse
+	err = json.Unmarshal(body, &flaskResp)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing Flask response: %v", err)
+	}
+
+	return &flaskResp, nil
 }

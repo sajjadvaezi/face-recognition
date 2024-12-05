@@ -7,6 +7,11 @@ import (
 	"log/slog"
 )
 
+type FlaskResponse struct {
+	Hash  string `json:"hash"`
+	Error string `json:"error"`
+}
+
 func RecognizeFace() (name string, err error) {
 
 	fc := clients.NewFlaskClient("http://127.0.0.1:5000")
@@ -41,4 +46,58 @@ func AddFace(studentNumber string) error {
 		return err
 	}
 	return nil
+}
+
+func RecognizeFaceWithImage(studentNumber, image string) (string, error) {
+	fc := clients.NewFlaskClient("http://127.0.0.1:5000")
+	slog.Info("calling flask endpoint")
+
+	// Call the Flask service
+	resp, err := fc.UploadImage(image)
+	if err != nil {
+		slog.Error("Error uploading image to Flask:", slog.String("error", err.Error()))
+		return "", fmt.Errorf("failed to upload image: %w", err)
+	}
+
+	if resp.Hash == "" {
+		return "", fmt.Errorf("flask service did not return a valid hash")
+	}
+
+	// Find the user by face hash in the database
+	user, err := db.FindUserByFaceHash(resp.Hash)
+	if err != nil {
+		slog.Error("Error finding user in database:", slog.String("hash", resp.Hash), slog.String("error", err.Error()))
+		return "", fmt.Errorf("user not found for hash: %s", resp.Hash)
+	}
+
+	// Verify the student number
+	if user.StudentNumber != studentNumber {
+		return "", fmt.Errorf("student number mismatch: expected %s, got %s", user.StudentNumber, studentNumber)
+	}
+
+	// Return the recognized user's name
+	return user.Name, nil
+}
+
+func AddFaceWithImage(studentNumber, image string) (string, error) {
+	fc := clients.NewFlaskClient("http://127.0.0.1:5000")
+	slog.Info("calling flask endpoint")
+
+	resp, err := fc.UploadImage(image)
+	if err != nil {
+		fmt.Println("couldn't upload image. error: ", resp.Error)
+		return "", err
+	}
+	fmt.Println("hash is ", resp.Hash)
+	user, err := db.FindUserByFaceHash(resp.Hash)
+	if err != nil {
+		return "", err
+	}
+
+	if user.StudentNumber == studentNumber {
+		return user.Name, nil
+
+	}
+	return "", nil
+
 }

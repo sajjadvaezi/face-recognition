@@ -15,5 +15,7 @@ func SetupRouter() *http.ServeMux {
 
 	mux.HandleFunc("/add/face", AddFaceHandler)
 
+	mux.HandleFunc("/upload", RecognizeWithImageHandler)
+
 	return mux
 }

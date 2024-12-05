@@ -4,3 +4,4 @@ identifier.sqlite
 /face/*.pkl
 /face/pics/*.jpg
 .idea
+front.html
