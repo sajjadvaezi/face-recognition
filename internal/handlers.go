@@ -152,9 +152,53 @@ func RecognizeWithImageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	response.Name = name
-	// Success response
-	fmt.Printf("Response: %+v\n", response)
 
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
+}
+
+func RegisterFaceWithImageHandler(w http.ResponseWriter, r *http.Request) {
+	type ImageUploadRequest struct {
+		StudentNumber string `json:"student_number"`
+		Image         string `json:"image"`
+	}
+
+	type RegisterResponse struct {
+		Error string `json:"error"`
+	}
+
+	// Enable CORS
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "application/json")
+
+	// Handle preflight requests
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	var uploadReq ImageUploadRequest
+	var response RegisterResponse
+
+	err := json.NewDecoder(r.Body).Decode(&uploadReq)
+	if err != nil {
+		response.Error = "invalid request body"
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	err = services.AddFaceWithImage(uploadReq.StudentNumber, uploadReq.Image)
+	if err != nil {
+		response.Error = err.Error()
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	// Success response
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)

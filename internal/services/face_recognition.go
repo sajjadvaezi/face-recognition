@@ -79,25 +79,28 @@ func RecognizeFaceWithImage(studentNumber, image string) (string, error) {
 	return user.Name, nil
 }
 
-func AddFaceWithImage(studentNumber, image string) (string, error) {
+func AddFaceWithImage(studentNumber, image string) error {
 	fc := clients.NewFlaskClient("http://127.0.0.1:5000")
 	slog.Info("calling flask endpoint")
 
-	resp, err := fc.UploadImage(image)
+	// sending the face through flask and register it
+	resp, err := fc.RegisterImage(image)
 	if err != nil {
-		fmt.Println("couldn't upload image. error: ", resp.Error)
-		return "", err
-	}
-	fmt.Println("hash is ", resp.Hash)
-	user, err := db.FindUserByFaceHash(resp.Hash)
-	if err != nil {
-		return "", err
+		if resp.Error != "" {
+			fmt.Println("couldn't upload image. error: ", resp.Error)
+			return err
+		}
+		fmt.Println("couldn't upload image.")
+		return err
 	}
 
-	if user.StudentNumber == studentNumber {
-		return user.Name, nil
+	// adding the face to the user in database
+	_, err = db.AddFaceWithStudentNumber(studentNumber, resp.Hash)
+	if err != nil {
+		fmt.Println("add to db error")
 
+		return err
 	}
-	return "", nil
+	return nil
 
 }
