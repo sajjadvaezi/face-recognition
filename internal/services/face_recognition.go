@@ -32,13 +32,13 @@ func RecognizeFace() (name string, err error) {
 	return user.Name, nil
 }
 
-func AddFace(studentNumber string) error {
+func AddFace(userNumber string) error {
 
 	fc := clients.NewFlaskClient("http://127.0.0.1:5000")
 	slog.Info("calling flask endpoint")
 	hash, err := fc.RegisterFace()
 	fmt.Println("face hash")
-	_, err = db.AddFaceWithStudentNumber(studentNumber, hash)
+	_, err = db.AddFaceWithUserNumber(userNumber, hash)
 	if err != nil {
 
 		fmt.Println("add to db error")
@@ -71,8 +71,8 @@ func RecognizeFaceWithImage(studentNumber, image string) (string, error) {
 	}
 
 	// Verify the student number
-	if user.StudentNumber != studentNumber {
-		return "", fmt.Errorf("student number mismatch: expected %s, got %s", user.StudentNumber, studentNumber)
+	if user.UserNumber != studentNumber {
+		return "", fmt.Errorf("student number mismatch: expected %s, got %s", user.UserNumber, studentNumber)
 	}
 
 	// Return the recognized user's name
@@ -95,7 +95,7 @@ func AddFaceWithImage(studentNumber, image string) error {
 	}
 
 	// adding the face to the user in database
-	_, err = db.AddFaceWithStudentNumber(studentNumber, resp.Hash)
+	_, err = db.AddFaceWithUserNumber(studentNumber, resp.Hash)
 	if err != nil {
 		fmt.Println("add to db error")
 

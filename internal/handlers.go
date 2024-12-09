@@ -13,8 +13,9 @@ func CheckHealthHandler(w http.ResponseWriter, r *http.Request) {
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	type registerRequest struct {
-		Name          string `json:"name"`
-		StudentNumber string `json:"student_number"`
+		Name       string `json:"name"`
+		UserNumber string `json:"user_number"`
+		Role       string `json:"role"`
 	}
 
 	type registerResponse struct {
@@ -27,7 +28,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err.Error())
 		return
 	}
-	createdUserID, err := services.CreateUser(request.Name, request.StudentNumber)
+	createdUserID, err := services.CreateUser(request.Name, request.UserNumber, request.Role)
 	if err != nil {
 		return
 	}
@@ -67,7 +68,7 @@ func RecognizeHandler(w http.ResponseWriter, r *http.Request) {
 
 func AddFaceHandler(w http.ResponseWriter, r *http.Request) {
 	type addFaceRequest struct {
-		StudentNumber string `json:"student_number"`
+		UserNumber string `json:"user_number"`
 	}
 
 	type response struct {
@@ -85,14 +86,14 @@ func AddFaceHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate input
-	if afReq.StudentNumber == "" {
+	if afReq.UserNumber == "" {
 		http.Error(w, "StudentNumber is required", http.StatusBadRequest)
 		fmt.Println("Validation error: StudentNumber is empty")
 		return
 	}
 
 	// Call the service to add the face
-	err = services.AddFace(afReq.StudentNumber)
+	err = services.AddFace(afReq.UserNumber)
 	if err != nil {
 		http.Error(w, "Failed to add face to database", http.StatusInternalServerError)
 		fmt.Println("Service error:", err.Error())
@@ -112,8 +113,8 @@ func AddFaceHandler(w http.ResponseWriter, r *http.Request) {
 
 func RecognizeWithImageHandler(w http.ResponseWriter, r *http.Request) {
 	type ImageUploadRequest struct {
-		StudentNumber string `json:"student_number"`
-		Image         string `json:"image"`
+		UserNumber string `json:"user_number"`
+		Image      string `json:"image"`
 	}
 
 	type RecognizeResponse struct {
@@ -144,7 +145,7 @@ func RecognizeWithImageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name, err := services.RecognizeFaceWithImage(uploadReq.StudentNumber, uploadReq.Image)
+	name, err := services.RecognizeFaceWithImage(uploadReq.UserNumber, uploadReq.Image)
 	if err != nil {
 		response.Error = err.Error()
 		w.WriteHeader(http.StatusInternalServerError)
@@ -159,8 +160,8 @@ func RecognizeWithImageHandler(w http.ResponseWriter, r *http.Request) {
 
 func RegisterFaceWithImageHandler(w http.ResponseWriter, r *http.Request) {
 	type ImageUploadRequest struct {
-		StudentNumber string `json:"student_number"`
-		Image         string `json:"image"`
+		UserNumber string `json:"user_number"`
+		Image      string `json:"image"`
 	}
 
 	type RegisterResponse struct {
@@ -190,7 +191,7 @@ func RegisterFaceWithImageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = services.AddFaceWithImage(uploadReq.StudentNumber, uploadReq.Image)
+	err = services.AddFaceWithImage(uploadReq.UserNumber, uploadReq.Image)
 	if err != nil {
 		response.Error = err.Error()
 		w.WriteHeader(http.StatusInternalServerError)

@@ -11,7 +11,7 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="face_recognition" uuid="88e981d7-4542-4083-9445-bfa9931f8c79">
+    <data-source source="LOCAL" name="face_recognition" uuid="920f6b12-0312-4e24-aac8-84b4080037e9">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
