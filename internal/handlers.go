@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/sajjadvaezi/face-recognition/internal/services"
+	"github.com/sajjadvaezi/face-recognition/models"
+	"log/slog"
 	"net/http"
 )
 
@@ -203,4 +205,43 @@ func RegisterFaceWithImageHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
+}
+
+func AddClassHandler(w http.ResponseWriter, r *http.Request) {
+	var req models.AddClassRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		res := models.AddClassResponse{
+			Status:     "failed",
+			StatusCode: http.StatusBadRequest,
+			Error:      "Invalid request body",
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(res)
+		slog.Error("Failed to decode request body", "error", err)
+		return
+	}
+
+	if err := services.AddClass(req); err != nil {
+		res := models.AddClassResponse{
+			Status:     "failed",
+			StatusCode: http.StatusInternalServerError,
+			Error:      err.Error(),
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(res)
+		slog.Error("Failed to add class", "error", err, "class_name", req.ClassName, "user_number", req.UserNumber)
+		return
+	}
+
+	res := models.AddClassResponse{
+		Status:     "success",
+		StatusCode: http.StatusOK,
+		Error:      "null",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		slog.Error("Failed to encode response", "error", err)
+	}
 }

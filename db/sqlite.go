@@ -124,3 +124,40 @@ func FindUserByUserNumber(userNumber string) (*models.User, error) {
 
 	return user, nil
 }
+
+func AddClass(classname, userNumber string) error {
+	queryInsertClass := `INSERT INTO classes (classname, teacher_id) VALUES (?,?)`
+	tx, err := db.Begin()
+	if err != nil {
+		return fmt.Errorf("failed to start transaction: %w", err)
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			tx.Rollback()
+			panic(p)
+		} else if err != nil {
+			tx.Rollback()
+		} else {
+			err = tx.Commit()
+		}
+	}()
+	queryFindUser := `SELECT user_id FROM users WHERE user_number = ?`
+	var userID int64
+	err = tx.QueryRow(queryFindUser, userNumber).Scan(&userID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return fmt.Errorf("no user found with the given user number")
+		}
+		return fmt.Errorf("failed to find user: %w", err)
+	}
+
+	_, err = tx.Exec(queryInsertClass, classname, userID)
+	if err != nil {
+		if errors.Is(err, sqlite3.ErrConstraintUnique) {
+			return err
+		}
+		return fmt.Errorf("failed to insert class: %w", err)
+	}
+	return nil
+
+}

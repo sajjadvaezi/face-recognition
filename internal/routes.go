@@ -20,5 +20,6 @@ func SetupRouter() *http.ServeMux {
 	// this is for adding face with request containing image in it
 	mux.HandleFunc("/face", RegisterFaceWithImageHandler)
 
+	mux.HandleFunc("/add/class", AddClassHandler)
 	return mux
 }
