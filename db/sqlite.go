@@ -161,3 +161,75 @@ func AddClass(classname, userNumber string) error {
 	return nil
 
 }
+
+func Attendance(studentNumber string, className string) (int64, error) {
+	tx, err := db.Begin()
+	if err != nil {
+		return 0, fmt.Errorf("failed to start transaction: %w", err)
+	}
+
+	defer func() {
+		if p := recover(); p != nil {
+			tx.Rollback()
+			panic(p)
+		} else if err != nil {
+			tx.Rollback()
+		} else {
+			err = tx.Commit()
+		}
+	}()
+
+	queryFindClass := `SELECT class_id FROM classes WHERE classname = ?`
+	var classID int64
+	err = tx.QueryRow(queryFindClass, className).Scan(&classID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, fmt.Errorf("no class found with the given class name")
+		}
+		return 0, fmt.Errorf("failed to find class: %w", err)
+	}
+
+	queryFindUser := `SELECT user_id FROM users WHERE user_number = ?`
+	var userID int64
+	err = tx.QueryRow(queryFindUser, studentNumber).Scan(&userID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, fmt.Errorf("no user found with the given user number")
+		}
+		return 0, fmt.Errorf("failed to find user: %w", err)
+	}
+
+	// Check if attendance already exists for today
+	queryCheckAttendance := `
+        SELECT attendance_id FROM attendance 
+        WHERE student_id = ? AND class_id = ? AND DATE(date) = DATE('now')
+    `
+	var existingAttendanceID int64
+	err = tx.QueryRow(queryCheckAttendance, userID, classID).Scan(&existingAttendanceID)
+	if err == nil {
+		// Attendance already exists for today
+		return 0, fmt.Errorf("attendance already recorded for this student in this class today")
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		// Some other database error occurred
+		return 0, fmt.Errorf("failed to check existing attendance: %w", err)
+	}
+
+	// Insert new attendance record
+	queryInsertAttendance := `
+        INSERT INTO attendance (student_id, class_id, date, present) 
+        VALUES (?, ?, DATE('now'), 1)
+    `
+	result, err := tx.Exec(queryInsertAttendance, userID, classID)
+	if err != nil {
+		return 0, fmt.Errorf("failed to insert attendance: %w", err)
+	}
+
+	// Get the ID of the newly inserted attendance record
+	attendanceID, err := result.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get attendance record ID: %w", err)
+	}
+
+	return attendanceID, nil
+}

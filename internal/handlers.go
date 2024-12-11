@@ -245,3 +245,43 @@ func AddClassHandler(w http.ResponseWriter, r *http.Request) {
 		slog.Error("Failed to encode response", "error", err)
 	}
 }
+
+func AttendanceHandler(w http.ResponseWriter, r *http.Request) {
+	atReq := models.AttendanceRequest{}
+
+	// Enable CORS
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "application/json")
+
+	// Handle preflight requests
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	var response models.AttendanceClassResponse
+
+	err := json.NewDecoder(r.Body).Decode(&atReq)
+	if err != nil {
+		response.Error = "invalid request body"
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	err = services.Attendance(atReq)
+	if err != nil {
+		response.Error = err.Error()
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+	response = models.AttendanceClassResponse{
+		Status:     "success",
+		StatusCode: http.StatusOK,
+		Error:      "null",
+	}
+	
+}

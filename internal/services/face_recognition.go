@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/sajjadvaezi/face-recognition/db"
 	"github.com/sajjadvaezi/face-recognition/internal/clients"
+	"github.com/sajjadvaezi/face-recognition/models"
 	"log/slog"
 )
 
@@ -87,7 +88,7 @@ func AddFaceWithImage(studentNumber, image string) error {
 	resp, err := fc.RegisterImage(image)
 	if err != nil {
 		if resp.Error != "" {
-			fmt.Println("couldn't upload image. error: ", resp.Error)
+			fmt.Println("couldn't upload im1age. error: ", resp.Error)
 			return err
 		}
 		fmt.Println("couldn't upload image.")
@@ -102,5 +103,29 @@ func AddFaceWithImage(studentNumber, image string) error {
 		return err
 	}
 	return nil
+
+}
+func RecognizeUser(image string) (*models.User, error) {
+	fc := clients.NewFlaskClient("http://127.0.0.1:5000")
+	slog.Info("calling flask endpoint")
+
+	// Call the Flask service
+	resp, err := fc.UploadImage(image)
+	if err != nil {
+		slog.Error("Error uploading image to Flask:", slog.String("error", err.Error()))
+		return nil, fmt.Errorf("failed to upload image: %w", err)
+	}
+
+	if resp.Hash == "" {
+		return nil, fmt.Errorf("flask service did not return a valid hash")
+	}
+
+	// Find the user by face hash in the database
+	user, err := db.FindUserByFaceHash(resp.Hash)
+	if err != nil {
+		slog.Error("Error finding user in database:", slog.String("hash", resp.Hash), slog.String("error", err.Error()))
+		return nil, fmt.Errorf("user not found for hash: %s", resp.Hash)
+	}
+	return user, nil
 
 }

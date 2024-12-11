@@ -15,3 +15,14 @@ type AddClassResponse struct {
 	StatusCode int    `json:"statusCode"`
 	Error      string `json:"error"`
 }
+
+type AttendanceRequest struct {
+	ClassName string `json:"class_name"`
+	Image     string `json:"image"`
+}
+
+type AttendanceClassResponse struct {
+	Status     string `json:"status"`
+	StatusCode int    `json:"statusCode"`
+	Error      string `json:"error"`
+}

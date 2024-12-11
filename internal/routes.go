@@ -21,5 +21,8 @@ func SetupRouter() *http.ServeMux {
 	mux.HandleFunc("/face", RegisterFaceWithImageHandler)
 
 	mux.HandleFunc("/add/class", AddClassHandler)
+
+	mux.HandleFunc("/class/attend", AttendanceHandler)
+
 	return mux
 }
