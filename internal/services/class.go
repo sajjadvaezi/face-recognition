@@ -22,7 +22,6 @@ func AddClass(addClass models.AddClassRequest) error {
 }
 
 func Attendance(request models.AttendanceRequest) error {
-
 	user, err := RecognizeUser(request.Image)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error recognizing user %s", err.Error()))
@@ -34,5 +33,6 @@ func Attendance(request models.AttendanceRequest) error {
 		slog.Error(fmt.Sprintf("couldn't not attend, error: %s", err.Error()))
 		return fmt.Errorf("user %s could not attend the class %s ", user.UserNumber, request.ClassName)
 	}
+	slog.Info(fmt.Sprintf("success attendance of %s with user_number %s at class %s", user.Name, user.UserNumber, request.ClassName))
 	return nil
 }

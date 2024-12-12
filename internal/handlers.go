@@ -283,5 +283,7 @@ func AttendanceHandler(w http.ResponseWriter, r *http.Request) {
 		StatusCode: http.StatusOK,
 		Error:      "null",
 	}
-	
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
+
 }

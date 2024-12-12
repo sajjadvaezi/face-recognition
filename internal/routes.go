@@ -1,28 +1,34 @@
 package internal
 
 import (
+	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/adaptor"
 	"net/http"
 )
 
 // SetupRouter initializes the router and defines the routes
-func SetupRouter() *http.ServeMux {
+func SetupRouter() *fiber.App {
+
+	app := fiber.New()
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/checkhealth", CheckHealthHandler)
 
 	// Define routes for face registration and recognition
-	mux.HandleFunc("/register", RegisterHandler)   // Handles POST requests to register faces
-	mux.HandleFunc("/recognize", RecognizeHandler) // Handles POST requests to recognize faces
 
-	mux.HandleFunc("/add/face", AddFaceHandler)
+	app.Post("/register", adaptor.HTTPHandlerFunc(RegisterHandler))
+	// Handles POST requests to recognize faces
 
-	mux.HandleFunc("/upload", RecognizeWithImageHandler)
+	app.Get("/recognize", adaptor.HTTPHandlerFunc(RecognizeHandler))
+	app.Post("/add/face", adaptor.HTTPHandlerFunc(AddClassHandler))
+	app.Post("/upload", adaptor.HTTPHandlerFunc(RecognizeWithImageHandler))
 
 	// this is for adding face with request containing image in it
-	mux.HandleFunc("/face", RegisterFaceWithImageHandler)
 
-	mux.HandleFunc("/add/class", AddClassHandler)
+	app.Post("/face", adaptor.HTTPHandlerFunc(RegisterFaceWithImageHandler))
+	app.Post("/add/class", adaptor.HTTPHandlerFunc(AddClassHandler))
 
-	mux.HandleFunc("/class/attend", AttendanceHandler)
+	app.Post("/class/attend", adaptor.HTTPHandlerFunc(AttendanceHandler))
 
-	return mux
+	return app
 }

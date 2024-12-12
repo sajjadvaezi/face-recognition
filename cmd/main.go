@@ -5,7 +5,6 @@ import (
 	"github.com/sajjadvaezi/face-recognition/db"
 	"github.com/sajjadvaezi/face-recognition/internal"
 	"log/slog"
-	"net/http"
 	"os"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -15,17 +14,13 @@ func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	db.InitSQLite()
 
-	mux := internal.SetupRouter()
+	fiberApp := internal.SetupRouter()
 
-	port := "8090"
-	addr := fmt.Sprintf("localhost:%s", port)
+	port := ":8090"
 
-	logger.Info(fmt.Sprintf("staring server on %s", addr))
-	err := http.ListenAndServe(addr, mux)
-
+	err := fiberApp.Listen(port)
 	if err != nil {
-		logger.Error("could not start mux, error:", err)
-		return
+		logger.Error(fmt.Sprintf("could not start app on port %s error: %s", port, err.Error()))
 	}
 
 }
