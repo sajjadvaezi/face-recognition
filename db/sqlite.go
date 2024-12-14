@@ -233,3 +233,50 @@ func Attendance(studentNumber string, className string) (int64, error) {
 
 	return attendanceID, nil
 }
+
+func AttendedUsers(className string) (models.Users, error) {
+	queryFindUsers := `
+		SELECT u.user_id, u.name, u.user_number, u.role, u.created_at
+		FROM attendance a
+		JOIN users u ON a.student_id = u.user_id
+		WHERE a.class_id = (SELECT class_id FROM classes WHERE classname = ?)
+		AND DATE(a.date) = DATE('now')
+	`
+
+	tx, err := db.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("failed to start transaction: %w", err)
+	}
+
+	defer func() {
+		if p := recover(); p != nil {
+			tx.Rollback()
+			panic(p)
+		} else if err != nil {
+			tx.Rollback()
+		} else {
+			err = tx.Commit()
+		}
+	}()
+
+	rows, err := tx.Query(queryFindUsers, className)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+	defer rows.Close()
+
+	var users models.Users
+	for rows.Next() {
+		var user models.User
+		if err := rows.Scan(&user.UserID, &user.Name, &user.UserNumber, &user.Role, &user.CreatedAt); err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		users = append(users, user)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration error: %w", err)
+	}
+
+	return users, nil
+}

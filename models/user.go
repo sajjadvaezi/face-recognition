@@ -19,6 +19,8 @@ type User struct {
 	CreatedAt  time.Time
 }
 
+type Users []User
+
 type Face interface {
 	GetFaceHash() string
 }

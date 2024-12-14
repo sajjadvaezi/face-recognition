@@ -20,7 +20,7 @@ func SetupRouter() *fiber.App {
 	// Handles POST requests to recognize faces
 
 	app.Get("/recognize", adaptor.HTTPHandlerFunc(RecognizeHandler))
-	app.Post("/add/face", adaptor.HTTPHandlerFunc(AddClassHandler))
+	app.Post("/add/face", adaptor.HTTPHandlerFunc(AddFaceHandler))
 	app.Post("/upload", adaptor.HTTPHandlerFunc(RecognizeWithImageHandler))
 
 	// this is for adding face with request containing image in it
@@ -29,6 +29,8 @@ func SetupRouter() *fiber.App {
 	app.Post("/add/class", adaptor.HTTPHandlerFunc(AddClassHandler))
 
 	app.Post("/class/attend", adaptor.HTTPHandlerFunc(AttendanceHandler))
+
+	app.Get("/class/:classname", AttendedUsersHandler)
 
 	return app
 }

@@ -36,3 +36,15 @@ func Attendance(request models.AttendanceRequest) error {
 	slog.Info(fmt.Sprintf("success attendance of %s with user_number %s at class %s", user.Name, user.UserNumber, request.ClassName))
 	return nil
 }
+
+func AttendedUsers(className string) (models.Users, error) {
+	if className == "" {
+		return nil, fmt.Errorf("empty class name")
+	}
+	users, err := db.AttendedUsers(className)
+	if err != nil {
+		slog.Error(fmt.Sprintf("error retriving users in class %s, error: %s", className, err.Error()))
+		return nil, fmt.Errorf("error getting users")
+	}
+	return users, nil
+}

@@ -3,6 +3,7 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gofiber/fiber/v3"
 	"github.com/sajjadvaezi/face-recognition/internal/services"
 	"github.com/sajjadvaezi/face-recognition/models"
 	"log/slog"
@@ -286,4 +287,43 @@ func AttendanceHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
 
+}
+
+func AttendedUsersHandler(c fiber.Ctx) error {
+	// Get the class name from the request parameters
+	className := c.Params("classname")
+
+	// Check if the class name is empty
+	if className == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "class name is required",
+		})
+	}
+
+	// Call the service layer to get the list of attended users
+	users, err := services.AttendedUsers(className)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to retrieve attended users",
+		})
+	}
+
+	// Transform the data to only include user number and name
+	type UserResponse struct {
+		UserNumber string `json:"user_number"`
+		Name       string `json:"name"`
+	}
+
+	var userResponses []UserResponse
+	for _, user := range users {
+		userResponses = append(userResponses, UserResponse{
+			UserNumber: user.UserNumber,
+			Name:       user.Name,
+		})
+	}
+
+	// Return the transformed list of users as a JSON response
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"users": userResponses,
+	})
 }
