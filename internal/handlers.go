@@ -22,51 +22,125 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type registerResponse struct {
-		ID int64
+		Status     string `json:"status"`       // Indicates "success" or "failed"
+		ID         int64  `json:"id,omitempty"` // User ID in case of success
+		Error      string `json:"error,omitempty"`
+		StatusCode int    `json:"status_code"`
 	}
-	response := registerResponse{}
-	request := registerRequest{}
-	err := json.NewDecoder(r.Body).Decode(&request)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-	createdUserID, err := services.CreateUser(request.Name, request.UserNumber, request.Role)
-	if err != nil {
-		return
-	}
-	response.ID = createdUserID
-	err = json.NewEncoder(w).Encode(response)
-	if err != nil {
-		fmt.Println(err.Error())
 
+	// Enable CORS
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "application/json")
+
+	// Handle preflight requests
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
 		return
 	}
 
+	var req registerRequest
+	var res registerResponse
+
+	// Decode the request body
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		res = registerResponse{
+			Status:     "failed",
+			Error:      "Invalid request payload",
+			StatusCode: http.StatusBadRequest,
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+
+	// Validate input
+	if req.Name == "" || req.UserNumber == "" || req.Role == "" {
+		res = registerResponse{
+			Status:     "failed",
+			Error:      "name, user_number, and role are required fields",
+			StatusCode: http.StatusBadRequest,
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+
+	// Create the user
+	createdUserID, err := services.CreateUser(req.Name, req.UserNumber, req.Role)
+	if err != nil {
+		// Log the detailed error for debugging
+		fmt.Printf("Error creating user: %v\n", err)
+
+		// Return a generic error message to the client
+		res = registerResponse{
+			Status:     "failed",
+			Error:      "An unexpected error occurred. Please try again later.",
+			StatusCode: http.StatusInternalServerError,
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(res)
+		return
+	}
+
+	// Respond with success
+	res = registerResponse{
+		Status:     "success",
+		ID:         createdUserID,
+		StatusCode: http.StatusOK,
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(res)
 }
 
 func RecognizeHandler(w http.ResponseWriter, r *http.Request) {
-
 	type recognizeResponse struct {
-		Name string `json:"name"`
+		Status     string `json:"status"` // Indicates "success" or "failed"
+		Name       string `json:"name,omitempty"`
+		Error      string `json:"error,omitempty"`
+		StatusCode int    `json:"status_code"`
 	}
 
+	// Enable CORS
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "application/json")
+
+	// Handle preflight requests
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	var res recognizeResponse
+
+	// Call the service to recognize the face
 	name, err := services.RecognizeFace()
 	if err != nil {
-		fmt.Println(err.Error())
+		// Log the detailed error for debugging
+		fmt.Printf("Error recognizing face: %v\n", err)
 
+		// Return a generic error message to the client
+		res = recognizeResponse{
+			Status:     "failed",
+			Error:      "An unexpected error occurred. Please try again later.",
+			StatusCode: http.StatusInternalServerError,
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(res)
 		return
 	}
-	recRes := recognizeResponse{
-		Name: name,
-	}
-	err = json.NewEncoder(w).Encode(&recRes)
-	if err != nil {
-		fmt.Println(err.Error())
 
-		return
+	// If face recognition is successful, respond with the name
+	res = recognizeResponse{
+		Status:     "success",
+		Name:       name,
+		StatusCode: http.StatusOK,
 	}
-
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(res)
 }
 
 func AddFaceHandler(w http.ResponseWriter, r *http.Request) {
@@ -75,43 +149,72 @@ func AddFaceHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type response struct {
-		Result string `json:"result"`
-		Error  string `json:"error,omitempty"`
+		Status     string `json:"status"` // Indicates "success" or "failed"
+		Result     string `json:"result,omitempty"`
+		Error      string `json:"error,omitempty"`
+		StatusCode int    `json:"status_code"`
 	}
 
-	// Decode the request body
+	// Enable CORS
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "application/json")
+
+	// Handle preflight requests
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	var afReq addFaceRequest
-	err := json.NewDecoder(r.Body).Decode(&afReq)
-	if err != nil {
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
-		fmt.Println("Decoding error:", err.Error())
+	var res response
+
+	// Decode the request body
+	if err := json.NewDecoder(r.Body).Decode(&afReq); err != nil {
+		res = response{
+			Status:     "failed",
+			Error:      "Invalid request payload",
+			StatusCode: http.StatusBadRequest,
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(res)
 		return
 	}
 
 	// Validate input
 	if afReq.UserNumber == "" {
-		http.Error(w, "StudentNumber is required", http.StatusBadRequest)
-		fmt.Println("Validation error: StudentNumber is empty")
+		res = response{
+			Status:     "failed",
+			Error:      "user_number is required",
+			StatusCode: http.StatusBadRequest,
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(res)
 		return
 	}
 
 	// Call the service to add the face
-	err = services.AddFace(afReq.UserNumber)
+	err := services.AddFace(afReq.UserNumber)
 	if err != nil {
-		http.Error(w, "Failed to add face to database", http.StatusInternalServerError)
-		fmt.Println("Service error:", err.Error())
+		res = response{
+			Status:     "failed",
+			Error:      err.Error(), // Provide the error for debugging or logging
+			StatusCode: http.StatusInternalServerError,
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(res)
 		return
 	}
 
 	// Respond with success
-	res := response{
-		Result: "successful",
+	res = response{
+		Status:     "success",
+		Result:     "Face added successfully",
+		StatusCode: http.StatusOK,
 	}
 	w.WriteHeader(http.StatusOK)
-	err = json.NewEncoder(w).Encode(res)
-	if err != nil {
-		fmt.Println("Encoding response error:", err.Error())
-	}
+	json.NewEncoder(w).Encode(res)
 }
 
 func RecognizeWithImageHandler(w http.ResponseWriter, r *http.Request) {
@@ -168,7 +271,9 @@ func RegisterFaceWithImageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type RegisterResponse struct {
-		Error string `json:"error"`
+		Status     string `json:"status"` // Indicates "success" or "failed"
+		Error      string `json:"error,omitempty"`
+		StatusCode int    `json:"status_code"`
 	}
 
 	// Enable CORS
@@ -184,28 +289,44 @@ func RegisterFaceWithImageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var uploadReq ImageUploadRequest
-	var response RegisterResponse
+	var res RegisterResponse
 
-	err := json.NewDecoder(r.Body).Decode(&uploadReq)
-	if err != nil {
-		response.Error = "invalid request body"
+	// Decode the request body
+	if err := json.NewDecoder(r.Body).Decode(&uploadReq); err != nil {
+		res = RegisterResponse{
+			Status:     "failed",
+			Error:      "Invalid request body",
+			StatusCode: http.StatusBadRequest,
+		}
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
+		json.NewEncoder(w).Encode(res)
 		return
 	}
 
-	err = services.AddFaceWithImage(uploadReq.UserNumber, uploadReq.Image)
+	// Process the image upload
+	err := services.AddFaceWithImage(uploadReq.UserNumber, uploadReq.Image)
 	if err != nil {
-		response.Error = err.Error()
+		// Log the error for debugging
+		fmt.Printf("Error registering face: %v\n", err)
+
+		// Return a detailed error message
+		res = RegisterResponse{
+			Status:     "failed",
+			Error:      err.Error(),
+			StatusCode: http.StatusInternalServerError,
+		}
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(response)
+		json.NewEncoder(w).Encode(res)
 		return
 	}
 
 	// Success response
-
+	res = RegisterResponse{
+		Status:     "success",
+		StatusCode: http.StatusOK,
+	}
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(res)
 }
 
 func AddClassHandler(w http.ResponseWriter, r *http.Request) {
