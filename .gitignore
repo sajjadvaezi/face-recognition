@@ -1,4 +1,3 @@
-/face/*.dat
 identifier.sqlite
 *.db
 /face/*.pkl
