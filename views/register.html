@@ -4,25 +4,136 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
-    <script src="/js/register.js" defer></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-<h1>Register User</h1>
-<form id="registerForm">
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" required><br><br>
+<body class="bg-gray-50 min-h-screen">
+<div class="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">Register User</h1>
 
-    <label for="user_number">User Number:</label>
-    <input type="text" id="user_number" name="user_number" required><br><br>
+    <form id="registerForm" class="space-y-6">
+        <!-- Name Input -->
+        <div class="space-y-2">
+            <label for="name" class="block text-sm font-medium text-gray-700">
+                Name
+            </label>
+            <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="Enter your name"
+                    required
+                    class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            >
+        </div>
 
-    <label for="role">Role:</label>
-    <select id="role" name="role" required>
-        <option value="student">Student</option>
-        <option value="teacher">Teacher</option>
-    </select><br><br>
+        <!-- User Number Input -->
+        <div class="space-y-2">
+            <label for="user_number" class="block text-sm font-medium text-gray-700">
+                User Number
+            </label>
+            <input
+                    type="text"
+                    id="user_number"
+                    name="user_number"
+                    placeholder="Enter user number"
+                    required
+                    class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            >
+        </div>
 
-    <button type="submit">Register</button>
-</form>
-<p id="responseMessage"></p>
+        <!-- Role Selection -->
+        <div class="space-y-2">
+            <label for="role" class="block text-sm font-medium text-gray-700">
+                Role
+            </label>
+            <select
+                    id="role"
+                    name="role"
+                    required
+                    class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white"
+            >
+                <option value="">Select a role</option>
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
+            </select>
+        </div>
+
+        <!-- Submit Button -->
+        <button
+                type="submit"
+                class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                id="submitBtn"
+        >
+                <span class="hidden" id="spinner">
+                    <svg class="animate-spin h-5 w-5 inline mr-2" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Registering...
+                </span>
+            <span id="buttonText">Register</span>
+        </button>
+    </form>
+
+    <!-- Response Message -->
+    <div
+            id="response-message"
+            class="mt-4 px-4 py-2 rounded hidden"
+    ></div>
+</div>
+
+<script>
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Show loading state
+        const spinner = document.getElementById('spinner');
+        const buttonText = document.getElementById('buttonText');
+        const submitBtn = document.getElementById('submitBtn');
+        const responseMessage = document.getElementById('response-message');
+
+        spinner.classList.remove('hidden');
+        buttonText.classList.add('hidden');
+        submitBtn.disabled = true;
+
+        const formData = {
+            name: document.getElementById('name').value,
+            user_number: document.getElementById('user_number').value,
+            role: document.getElementById('role').value
+        };
+
+        try {
+            const response = await fetch('http://localhost:8090/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+            responseMessage.classList.remove('hidden');
+
+            if (response.ok) {
+                responseMessage.textContent = `Success! User ID: ${data.id}`;
+                responseMessage.className = "mt-4 px-4 py-2 rounded bg-green-100 text-green-700";
+                this.reset();
+            } else {
+                responseMessage.textContent = `Error: ${data.error || "Failed to register"}`;
+                responseMessage.className = "mt-4 px-4 py-2 rounded bg-red-100 text-red-700";
+            }
+        } catch (error) {
+            responseMessage.classList.remove('hidden');
+            responseMessage.textContent = "Error connecting to server";
+            responseMessage.className = "mt-4 px-4 py-2 rounded bg-red-100 text-red-700";
+        } finally {
+            // Reset button state
+            spinner.classList.add('hidden');
+            buttonText.classList.remove('hidden');
+            submitBtn.disabled = false;
+        }
+    });
+</script>
 </body>
 </html>

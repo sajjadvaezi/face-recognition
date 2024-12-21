@@ -13,8 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
             videoElement.play();
         } catch (error) {
             console.error("Error accessing the camera:", error);
-            responseMessage.textContent = "Error accessing the camera.";
-            responseMessage.style.color = "red";
+            showResponseMessage("Error accessing the camera. Please allow access or check your device.", "red");
         }
     }
 
@@ -27,12 +26,26 @@ document.addEventListener("DOMContentLoaded", () => {
         return canvas.toDataURL("image/jpeg").split(",")[1]; // Extract base64 data
     }
 
+    // Display the response message with color
+    function showResponseMessage(message, color) {
+        responseMessage.textContent = message;
+        responseMessage.style.backgroundColor = color === "red" ? "#FEE2E2" : "#D1FAE5";
+        responseMessage.style.color = color === "red" ? "#B91C1C" : "#065F46";
+        responseMessage.classList.remove("hidden");
+    }
+
+    // Clear the response message
+    function clearResponseMessage() {
+        responseMessage.classList.add("hidden");
+        responseMessage.textContent = "";
+    }
+
     // Handle the form submission
     captureButton.addEventListener("click", async () => {
+        clearResponseMessage(); // Clear any previous messages
         const userNumber = userNumberInput.value.trim();
         if (!userNumber) {
-            responseMessage.textContent = "User number is required.";
-            responseMessage.style.color = "red";
+            showResponseMessage("User number is required.", "red");
             return;
         }
 
@@ -53,15 +66,17 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await response.json();
 
             if (response.ok) {
-                responseMessage.textContent = "Face data added successfully!";
-                responseMessage.style.color = "green";
+                showResponseMessage("Face data added successfully!", "green");
             } else {
-                responseMessage.textContent = `Error: ${data.error || "Failed to add face data"}`;
-                responseMessage.style.color = "red";
+                const errorMessage =
+                    data.error.includes("UNIQUE constraint failed")
+                        ? "Face data already exists for this user."
+                        : data.error || "Failed to add face data.";
+                showResponseMessage(`Error: ${errorMessage}`, "red");
             }
         } catch (error) {
-            responseMessage.textContent = `Error: ${error.message}`;
-            responseMessage.style.color = "red";
+            console.error("Error submitting face data:", error);
+            showResponseMessage("Error connecting to the server. Please try again.", "red");
         }
     });
 

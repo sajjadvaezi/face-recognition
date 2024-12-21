@@ -4,44 +4,151 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Show Attendance</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-
-        label, input, button {
-            margin: 5px 0;
-            display: block;
-        }
-
-        #error-message {
-            color: red;
-            margin-top: 10px;
-        }
-
-        #user-list-container {
-            margin-top: 20px;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-<h1>Show Class Attendance</h1>
+<body class="bg-gray-50 min-h-screen p-6">
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">Class Attendance</h1>
 
-<!-- Input for Class Name -->
-<div>
-    <label for="class_name">Class Name:</label>
-    <input type="text" id="class_name" placeholder="Enter class name" />
-    <button id="fetch">Fetch Attendance</button>
+        <!-- Search Form -->
+        <div class="flex gap-4 items-end">
+            <div class="flex-1">
+                <label for="class_name" class="block text-sm font-medium text-gray-700 mb-2">
+                    Class Name
+                </label>
+                <input
+                        type="text"
+                        id="class_name"
+                        placeholder="Enter class name"
+                        class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                />
+            </div>
+            <button
+                    id="fetch"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center gap-2 min-w-[140px] justify-center"
+            >
+                <span id="buttonText">Fetch Attendance</span>
+                <svg id="spinner" class="animate-spin h-5 w-5 hidden" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Error Message -->
+        <div
+                id="error-message"
+                class="mt-4 px-4 py-2 rounded-md bg-red-100 text-red-700 hidden"
+        ></div>
+    </div>
+
+    <!-- Results Container -->
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div id="user-list-container" class="overflow-x-auto">
+            <!-- Table will be inserted here -->
+        </div>
+    </div>
 </div>
 
-<!-- Error Message -->
-<p id="error-message"></p>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const classNameInput = document.getElementById("class_name");
+        const fetchButton = document.getElementById("fetch");
+        const userListContainer = document.getElementById("user-list-container");
+        const errorMessage = document.getElementById("error-message");
+        const spinner = document.getElementById("spinner");
+        const buttonText = document.getElementById("buttonText");
 
-<!-- User List Container -->
-<div id="user-list-container"></div>
+        async function fetchAttendance() {
+            const className = classNameInput.value.trim();
 
-<!-- Include the JavaScript -->
-<script src="/js/show_attendance.js"></script>
+            if (!className) {
+                errorMessage.textContent = "Please enter a class name";
+                errorMessage.classList.remove("hidden");
+                userListContainer.innerHTML = "";
+                return;
+            }
+
+            // Show loading state
+            spinner.classList.remove("hidden");
+            buttonText.textContent = "Loading...";
+            fetchButton.disabled = true;
+            errorMessage.classList.add("hidden");
+
+            try {
+                const response = await fetch(`http://localhost:8090/class/${className}`, {
+                    method: "GET"
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || "Failed to fetch attendance");
+                }
+
+                if (result.users && result.users.length > 0) {
+                    displayUsers(result.users);
+                } else {
+                    userListContainer.innerHTML = `
+                            <div class="p-6 text-center text-gray-500">
+                                No attendance records found for this class.
+                            </div>
+                        `;
+                }
+            } catch (error) {
+                errorMessage.textContent = error.message;
+                errorMessage.classList.remove("hidden");
+                userListContainer.innerHTML = "";
+            } finally {
+                // Reset loading state
+                spinner.classList.add("hidden");
+                buttonText.textContent = "Fetch Attendance";
+                fetchButton.disabled = false;
+            }
+        }
+
+        function displayUsers(users) {
+            const tableHTML = `
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    User Number
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Name
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            ${users.map(user => `
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        ${user.user_number}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        ${user.name}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+
+            userListContainer.innerHTML = tableHTML;
+        }
+
+        fetchButton.addEventListener("click", fetchAttendance);
+
+        // Add keyboard shortcut for search
+        classNameInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                fetchAttendance();
+            }
+        });
+    });
+</script>
 </body>
 </html>

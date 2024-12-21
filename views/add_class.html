@@ -4,19 +4,133 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Class</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-<h1>Add Class</h1>
-<form id="addClassForm">
-    <label for="className">Class Name:</label>
-    <input type="text" id="className" placeholder="Enter Class Name" required>
-    <br>
-    <label for="userNumber">User Number:</label>
-    <input type="text" id="userNumber" placeholder="Enter Your User Number" required>
-    <br>
-    <button type="submit">Add Class</button>
-</form>
-<p id="responseMessage"></p>
-<script src="/js/add_class.js" defer></script>
+<body class="bg-gray-50 min-h-screen">
+<div class="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">Add Class</h1>
+
+    <form
+            id="addClass"
+            class="space-y-6"
+    >
+        <!-- Class Name Input -->
+        <div class="space-y-2">
+            <label
+                    for="className"
+                    class="block text-sm font-medium text-gray-700"
+            >
+                Class Name
+            </label>
+            <input
+                    type="text"
+                    id="className"
+                    name="class_name"
+                    placeholder="Enter Class Name"
+                    required
+                    class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            >
+        </div>
+
+        <!-- User Number Input -->
+        <div class="space-y-2">
+            <label
+                    for="userNumber"
+                    class="block text-sm font-medium text-gray-700"
+            >
+                User Number
+            </label>
+            <input
+                    type="text"
+                    id="userNumber"
+                    name="user_number"
+                    placeholder="Enter Your User Number"
+                    required
+                    class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            >
+        </div>
+
+        <!-- Submit Button -->
+        <button
+                type="submit"
+                class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                id="submitBtn"
+        >
+                <span class="hidden" id="spinner">
+                    <svg class="animate-spin h-5 w-5 inline mr-2" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Adding Class...
+                </span>
+            <span id="buttonText">Add Class</span>
+        </button>
+    </form>
+
+    <!-- Response Message -->
+    <div
+            id="response-message"
+            class="mt-4 px-4 py-2 rounded hidden"
+    ></div>
+</div>
+
+<script>
+    document.getElementById('addClass').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Show loading state
+        const spinner = document.getElementById('spinner');
+        const buttonText = document.getElementById('buttonText');
+        const submitBtn = document.getElementById('submitBtn');
+        const responseMessage = document.getElementById('response-message');
+
+        spinner.classList.remove('hidden');
+        buttonText.classList.add('hidden');
+        submitBtn.disabled = true;
+
+        const formData = {
+            class_name: document.getElementById('className').value,
+            user_number: document.getElementById('userNumber').value
+        };
+
+        try {
+            const response = await fetch('http://localhost:8090/add/class', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+            responseMessage.classList.remove('hidden');
+
+            if (response.ok && data.status === "success") {
+                responseMessage.textContent = "Class added successfully!";
+                responseMessage.className = "mt-4 px-4 py-2 rounded bg-green-100 text-green-700";
+                this.reset();
+            } else {
+                let errorMessage = data.error;
+                if (errorMessage.includes("UNIQUE constraint failed")) {
+                    errorMessage = "Class name already exists.";
+                } else if (errorMessage.includes("no user found")) {
+                    errorMessage = "No teacher found with given user number.";
+                }
+                responseMessage.textContent = `Error: ${errorMessage}`;
+                responseMessage.className = "mt-4 px-4 py-2 rounded bg-red-100 text-red-700";
+            }
+        } catch (error) {
+            responseMessage.classList.remove('hidden');
+            responseMessage.textContent = "Error connecting to server";
+            responseMessage.className = "mt-4 px-4 py-2 rounded bg-red-100 text-red-700";
+        } finally {
+            // Reset button state
+            spinner.classList.add('hidden');
+            buttonText.classList.remove('hidden');
+            submitBtn.disabled = false;
+        }
+    });
+</script>
 </body>
 </html>

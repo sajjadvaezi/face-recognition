@@ -1,4 +1,3 @@
-// Ensure DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
     const video = document.getElementById("video");
     const captureButton = document.getElementById("capture");
@@ -8,15 +7,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const successMessage = document.getElementById("success-message");
     let base64Image = "";
 
+    // Helper function to show messages
+    function showMessage(message, type) {
+        if (type === "error") {
+            errorMessage.textContent = message;
+            errorMessage.classList.remove("hidden");
+            successMessage.classList.add("hidden");
+        } else {
+            successMessage.textContent = message;
+            successMessage.classList.remove("hidden");
+            errorMessage.classList.add("hidden");
+        }
+    }
+
     // Initialize camera
     async function startCamera() {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: true,
-            });
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
             video.srcObject = stream;
         } catch (error) {
-            errorMessage.textContent = "Camera access denied or unavailable.";
+            showMessage("Camera access denied or unavailable.", "error");
             console.error("Error starting camera:", error);
         }
     }
@@ -29,8 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const context = canvas.getContext("2d");
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         base64Image = canvas.toDataURL("image/jpeg").split(",")[1]; // Convert to Base64
-        successMessage.textContent = "Image captured successfully!";
-        errorMessage.textContent = ""; // Clear error message
+        showMessage("Image captured successfully!", "success");
     }
 
     // Submit attendance
@@ -38,20 +47,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const className = classNameInput.value.trim();
 
         if (!base64Image || !className) {
-            errorMessage.textContent = "Both image and class name are required!";
+            showMessage("Both image and class name are required!", "error");
             return;
         }
 
         try {
             const response = await fetch("http://localhost:8090/class/attend", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    image: base64Image,
-                    class_name: className,
-                }),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ image: base64Image, class_name: className }),
             });
 
             if (!response.ok) {
@@ -61,19 +65,17 @@ document.addEventListener("DOMContentLoaded", () => {
             const result = await response.json();
 
             if (result.status === "success") {
-                successMessage.textContent = "Attendance marked successfully!";
-                errorMessage.textContent = ""; // Clear error message
-            } else if (
-                result.error &&
-                result.error.includes("could not attend the class")
-            ) {
-                errorMessage.textContent = "User already attended the class.";
+                showMessage("Attendance marked successfully!", "success");
+                classNameInput.value = ""; // Clear input
+                base64Image = ""; // Reset image
+            } else if (result.error && result.error.includes("could not attend the class")) {
+                showMessage("User already attended the class.", "error");
             } else {
-                errorMessage.textContent = "Failed to mark attendance.";
+                showMessage("Failed to mark attendance.", "error");
                 console.error("Error:", result.error);
             }
         } catch (error) {
-            errorMessage.textContent = "Error submitting attendance.";
+            showMessage("Error submitting attendance.", "error");
             console.error("Error submitting attendance:", error);
         }
     }

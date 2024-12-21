@@ -4,34 +4,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attend Class</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-<h1>Attend Class</h1>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+<div class="w-full max-w-md bg-white shadow-lg rounded-lg p-6">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Attend Class</h1>
 
-<!-- Video Stream -->
-<div>
-    <video id="video" autoplay playsinline></video>
-    <button id="capture">Capture Image</button>
+    <!-- Video Stream -->
+    <div class="mb-4">
+        <video id="video" autoplay playsinline class="w-full rounded border"></video>
+    </div>
+    <div class="flex justify-center mb-6">
+        <button
+                id="capture"
+                class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+            Capture Image
+        </button>
+    </div>
+
+    <!-- Input for Class Name -->
+    <div class="mb-4">
+        <label for="class_name" class="block text-sm font-medium text-gray-700">Class Name</label>
+        <input
+                type="text"
+                id="class_name"
+                placeholder="Enter class name"
+                class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
+        />
+    </div>
+
+    <!-- Submit Button -->
+    <div class="flex justify-center">
+        <button
+                id="submit"
+                class="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+        >
+            Submit Attendance
+        </button>
+    </div>
+
+    <!-- Error and Success Messages -->
+    <div id="messages" class="mt-6">
+        <p id="error-message" class="hidden text-red-600 text-center"></p>
+        <p id="success-message" class="hidden text-green-600 text-center"></p>
+    </div>
 </div>
 
-<!-- Input for Class Name -->
-<div>
-    <label for="class_name">Class Name:</label>
-    <input type="text" id="class_name" placeholder="Enter class name" />
-</div>
-
-<!-- Submit Button -->
-<div>
-    <button id="submit">Submit Attendance</button>
-</div>
-
-<!-- Error and Success Messages -->
-<div>
-    <p id="error-message" style="color: red;"></p>
-    <p id="success-message" style="color: green;"></p>
-</div>
-
-<!-- Include the JavaScript -->
 <script src="/js/attend_class.js"></script>
 </body>
 </html>
