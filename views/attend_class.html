@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attend Class</title>
+</head>
+<body>
+<h1>Attend Class</h1>
+
+<!-- Video Stream -->
+<div>
+    <video id="video" autoplay playsinline></video>
+    <button id="capture">Capture Image</button>
+</div>
+
+<!-- Input for Class Name -->
+<div>
+    <label for="class_name">Class Name:</label>
+    <input type="text" id="class_name" placeholder="Enter class name" />
+</div>
+
+<!-- Submit Button -->
+<div>
+    <button id="submit">Submit Attendance</button>
+</div>
+
+<!-- Error and Success Messages -->
+<div>
+    <p id="error-message" style="color: red;"></p>
+    <p id="success-message" style="color: green;"></p>
+</div>
+
+<!-- Include the JavaScript -->
+<script src="/js/attend_class.js"></script>
+</body>
+</html>

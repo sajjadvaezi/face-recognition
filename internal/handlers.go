@@ -3,7 +3,7 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v2"
 	"github.com/sajjadvaezi/face-recognition/internal/services"
 	"github.com/sajjadvaezi/face-recognition/models"
 	"log/slog"
@@ -388,6 +388,8 @@ func AttendanceHandler(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&atReq)
 	if err != nil {
 		response.Error = "invalid request body"
+		response.Status = "failed"
+		response.StatusCode = http.StatusBadRequest
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(response)
 		return
@@ -396,6 +398,8 @@ func AttendanceHandler(w http.ResponseWriter, r *http.Request) {
 	err = services.Attendance(atReq)
 	if err != nil {
 		response.Error = err.Error()
+		response.Status = "failed"
+		response.StatusCode = http.StatusInternalServerError
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(response)
 		return
@@ -410,7 +414,7 @@ func AttendanceHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func AttendedUsersHandler(c fiber.Ctx) error {
+func AttendedUsersHandler(c *fiber.Ctx) error {
 	// Get the class name from the request parameters
 	className := c.Params("classname")
 

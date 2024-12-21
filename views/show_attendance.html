@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Show Attendance</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        label, input, button {
+            margin: 5px 0;
+            display: block;
+        }
+
+        #error-message {
+            color: red;
+            margin-top: 10px;
+        }
+
+        #user-list-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<h1>Show Class Attendance</h1>
+
+<!-- Input for Class Name -->
+<div>
+    <label for="class_name">Class Name:</label>
+    <input type="text" id="class_name" placeholder="Enter class name" />
+    <button id="fetch">Fetch Attendance</button>
+</div>
+
+<!-- Error Message -->
+<p id="error-message"></p>
+
+<!-- User List Container -->
+<div id="user-list-container"></div>
+
+<!-- Include the JavaScript -->
+<script src="/js/show_attendance.js"></script>
+</body>
+</html>

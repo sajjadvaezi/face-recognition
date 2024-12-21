@@ -1,9 +1,10 @@
 package internal
 
 import (
-	"github.com/gofiber/fiber/v3"
-	"github.com/gofiber/fiber/v3/middleware/adaptor"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	"net/http"
+	"time"
 )
 
 // SetupRouter initializes the router and defines the routes
@@ -13,6 +14,36 @@ func SetupRouter() *fiber.App {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/checkhealth", CheckHealthHandler)
+
+	// Serve static files from the "static" directory
+	app.Static("/", "./static", fiber.Static{
+		Compress:      true,
+		ByteRange:     true,
+		Browse:        true,
+		Index:         "index.html",
+		CacheDuration: 5 * time.Second,
+		MaxAge:        3600,
+	})
+	// Serve views for registration and face data capture
+	app.Get("/register-view", func(c *fiber.Ctx) error {
+		return c.SendFile("./views/register.html")
+	})
+
+	app.Get("/face-view", func(c *fiber.Ctx) error {
+		return c.SendFile("./views/face.html")
+	})
+
+	app.Get("/add-class-view", func(c *fiber.Ctx) error {
+		return c.SendFile("./views/add_class.html")
+	})
+
+	app.Get("/attend-class-view", func(c *fiber.Ctx) error {
+		return c.SendFile("./views/attend_class.html")
+	})
+
+	app.Get("/show-attendance-view", func(c *fiber.Ctx) error {
+		return c.SendFile("./views/show_attendance.html")
+	})
 
 	// Define routes for face registration and recognition
 
