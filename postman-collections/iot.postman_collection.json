@@ -1,0 +1,564 @@
+{
+	"info": {
+		"_postman_id": "688528b7-8cae-4fd8-870f-660726050b9d",
+		"name": "iot",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29259533",
+		"_collection_link": "https://winter-spaceship-894734.postman.co/workspace/iot~55759313-8eff-4df1-aa2f-00858b5af22d/collection/29259533-688528b7-8cae-4fd8-870f-660726050b9d?action=share&source=collection_link&creator=29259533"
+	},
+	"item": [
+		{
+			"name": "Back-End",
+			"item": [
+				{
+					"name": "register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"jane done\",\n    \"user_number\": \"12345\",\n    \"role\":\"student\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8090/register",
+							"host": [
+								"localhost"
+							],
+							"port": "8090",
+							"path": [
+								"register"
+							]
+						},
+						"description": "here users can register. a user can be either **student** or **teacher** ."
+					},
+					"response": [
+						{
+							"name": "example",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Sam Altman\",\n    \"user_number\": \"2222\",\n    \"role\": \"teacher\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:8090/register",
+									"host": [
+										"localhost"
+									],
+									"port": "8090",
+									"path": [
+										"register"
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						},
+						{
+							"name": "successful",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"jane doe\",\n    \"user_number\": \"12345\",\n    \"role\":\"student\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:8090/register",
+									"host": [
+										"localhost"
+									],
+									"port": "8090",
+									"path": [
+										"register"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Thu, 19 Dec 2024 18:44:03 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "46"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Methods",
+									"value": "POST, OPTIONS"
+								},
+								{
+									"key": "Access-Control-Allow-Headers",
+									"value": "Content-Type"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"success\",\n    \"id\": 7,\n    \"status_code\": 200\n}"
+						}
+					]
+				},
+				{
+					"name": "adding a face",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"image\": \"\",\n    \"user_number\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8090/face",
+							"host": [
+								"localhost"
+							],
+							"port": "8090",
+							"path": [
+								"face"
+							]
+						},
+						"description": "here user can add face for itself. please note the image should be in **base64**"
+					},
+					"response": []
+				},
+				{
+					"name": "adding a class",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"class_name\":\"math\",\n    \"user_number\":\"2222\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8090/add/class",
+							"host": [
+								"localhost"
+							],
+							"port": "8090",
+							"path": [
+								"add",
+								"class"
+							]
+						},
+						"description": "here a teacher can create a class."
+					},
+					"response": [
+						{
+							"name": "failed response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"class_name\":\"ai\",\n    \"user_number\":\"1234\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:8090/add/class",
+									"host": [
+										"localhost"
+									],
+									"port": "8090",
+									"path": [
+										"add",
+										"class"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "plain",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Thu, 19 Dec 2024 18:42:46 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "text/plain; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "142"
+								}
+							],
+							"cookie": [],
+							"body": "{\"status\":\"failed\",\"statusCode\":500,\"error\":\"error adding to db, error: failed to insert class: UNIQUE constraint failed: classes.classname\"}\n"
+						},
+						{
+							"name": "successful response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"class_name\":\"math\",\n    \"user_number\":\"1234\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:8090/add/class",
+									"host": [
+										"localhost"
+									],
+									"port": "8090",
+									"path": [
+										"add",
+										"class"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Thu, 19 Dec 2024 18:54:23 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "53"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"success\",\n    \"statusCode\": 200,\n    \"error\": \"null\"\n}"
+						}
+					]
+				},
+				{
+					"name": "attend class",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"image\":\"\",\n    \"class_name\":\"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8090/class/attend",
+							"host": [
+								"localhost"
+							],
+							"port": "8090",
+							"path": [
+								"class",
+								"attend"
+							]
+						},
+						"description": "here a user can attend a class. the image is in **base64**"
+					},
+					"response": [
+						{
+							"name": "failed attendace response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"image\":\"\",\n    \"class_name\":\"math\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:8090/class/attend",
+									"host": [
+										"localhost"
+									],
+									"port": "8090",
+									"path": [
+										"class",
+										"attend"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Sat, 21 Dec 2024 13:46:38 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "96"
+								},
+								{
+									"key": "Access-Control-Allow-Headers",
+									"value": "Content-Type"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Methods",
+									"value": "POST, OPTIONS"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"status\": \"failed\",\n    \"statusCode\": 500,\n    \"error\": \"user 123456 could not attend the class tahghigh \"\n}"
+						}
+					]
+				},
+				{
+					"name": "attended users in class",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8090/class/xyz",
+							"host": [
+								"localhost"
+							],
+							"port": "8090",
+							"path": [
+								"class",
+								"xyz"
+							]
+						},
+						"description": "in this endpoint you should be able to see users that attended this class"
+					},
+					"response": [
+						{
+							"name": "no user attended (failed)",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:8090/class/ai",
+									"host": [
+										"localhost"
+									],
+									"port": "8090",
+									"path": [
+										"class",
+										"ai"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Thu, 19 Dec 2024 18:51:13 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "14"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"users\": null\n}"
+						},
+						{
+							"name": "successful response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:8090/class/xyz",
+									"host": [
+										"localhost"
+									],
+									"port": "8090",
+									"path": [
+										"class",
+										"xyz"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Thu, 19 Dec 2024 18:51:57 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "58"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"users\": [\n        {\n            \"user_number\": \"123456\",\n            \"name\": \"sajjad vaezi\"\n        }\n    ]\n}"
+						}
+					]
+				}
+			],
+			"description": "this a microservice backend create with golang with communicate with flask endpoint  \nat localhost:5000 and the python sevice handle all face recognition  \nIn golang service I just handled the user service relted sutff so it be decoupled and anyone can use the python code"
+		},
+		{
+			"name": "Front-End",
+			"item": [
+				{
+					"name": "register view",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8090/register-view",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8090",
+							"path": [
+								"register-view"
+							]
+						},
+						"description": "this endpoint send request to localhost:8090/register with the body described there"
+					},
+					"response": []
+				},
+				{
+					"name": "face view",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8090/face-view",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8090",
+							"path": [
+								"face-view"
+							]
+						},
+						"description": "here user with its user_number can add a face for itself so it can use it later. this endpoint also call localhost:8090/face it described body"
+					},
+					"response": []
+				},
+				{
+					"name": "attend class view",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8090/attend-class-view",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8090",
+							"path": [
+								"attend-class-view"
+							]
+						},
+						"description": "here user with entering an existing class name can attend a class with his image"
+					},
+					"response": []
+				},
+				{
+					"name": "show attendance view",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8090/show-attendance-view",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8090",
+							"path": [
+								"show-attendance-view"
+							]
+						},
+						"description": "Here a user can enter a class name and see which users attended the class today"
+					},
+					"response": []
+				}
+			],
+			"description": "Here I have listed all the fronend endpoints that user can use for convinience . The each endpoint send request to its related backend endpoint"
+		}
+	],
+	"variable": [
+		{
+			"key": "class_name",
+			"value": "class_name"
+		}
+	]
+}
