@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            const response = await fetch("https://192.168.164.125:8090/add/class", {
+            const response = await fetch("https://192.168.164.125:443/add/class", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            const response = await fetch("https://192.168.164.125:8090/class/attend", {
+            const response = await fetch("https://192.168.164.125:443/class/attend", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ image: base64Image, class_name: className }),

@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const base64Image = captureImage();
 
         try {
-            const response = await fetch("https://192.168.164.125:8090/face", {
+            const response = await fetch("https://192.168.164.125:443/face", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            const response = await fetch(`https://192.168.164.125:8090/class/${className}`, {
+            const response = await fetch(`https://192.168.164.125:443/class/${className}`, {
                 method: "GET",
             });
 
