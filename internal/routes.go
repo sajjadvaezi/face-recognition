@@ -3,6 +3,7 @@ package internal
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"net/http"
 	"time"
 )
@@ -24,6 +25,11 @@ func SetupRouter() *fiber.App {
 		CacheDuration: 5 * time.Second,
 		MaxAge:        3600,
 	})
+
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "*", // Allow all origins (adjust this in production for security)
+		AllowMethods: "GET,POST,PUT,DELETE",
+	}))
 	// Serve views for registration and face data capture
 	app.Get("/register-view", func(c *fiber.Ctx) error {
 		return c.SendFile("./views/register.html")

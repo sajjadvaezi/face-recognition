@@ -12,13 +12,14 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         try {
-            const response = await fetch("http://localhost:8090/register", {
+            const response = await fetch("http://192.168.164.125:8090/register", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(formData),
             });
+
 
             const data = await response.json();
 

@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            const response = await fetch("http://localhost:8090/add/class", {
+            const response = await fetch("http://192.168.164.125:8090/add/class", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

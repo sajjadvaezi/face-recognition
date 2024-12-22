@@ -16,11 +16,12 @@ func main() {
 
 	fiberApp := internal.SetupRouter()
 
+	// Set port and host to listen on all interfaces
 	port := ":8090"
 
-	err := fiberApp.Listen(port)
+	// Use 0.0.0.0 to listen on all interfaces (including external devices)
+	err := fiberApp.Listen("0.0.0.0" + port)
 	if err != nil {
 		logger.Error(fmt.Sprintf("could not start app on port %s error: %s", port, err.Error()))
 	}
-
 }
