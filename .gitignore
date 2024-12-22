@@ -3,3 +3,4 @@ identifier.sqlite
 /face/pics/*.jpg
 .idea
 front.html
+/static/js/*.gz
